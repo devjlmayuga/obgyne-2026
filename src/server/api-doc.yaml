@@ -1,0 +1,595 @@
+swagger: "2.0"
+info:
+  description: ""
+  version: "1.0.0"
+  title: "JACC APIs"
+
+host: "jacc-api.herokuapp.com"
+basePath: "/api"
+schemes:
+- "https"
+- "http"
+paths:
+  /auth/login:
+    post:
+      tags:
+      - "Authentication"
+      summary: "Generate auth token"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Pet object that needs to be added to the store"
+        required: true
+        schema:
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/insert/today-patient:
+    post:
+      tags:
+      - "Schedule Patient"
+      summary: "Add patient for this day"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          properties:
+            patient_name:
+              type: string
+            address:
+              type: string
+            birth_date:
+              type: string
+            contact_no:
+              type: string
+            cs:
+              type: string
+            philhealth:
+              type: string
+            hmo:
+              type: string
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/get-list/today-patient:
+    get:
+      tags:
+      - "Schedule Patient"
+      summary: "Get patient for this day"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/update/status/:
+    post:
+      tags:
+      - "Schedule Patient"
+      summary: "update patient status for this day"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          properties:
+            patient_id:
+              type: integer
+            status_id:
+              type: integer
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/prescribed-medicine/:
+    post:
+      tags:
+      - "Schedule Patient"
+      summary: "prescribe medicine patient"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          properties:
+            schedule_checkup_id:
+              type: integer
+            medicine_id:
+              type: integer
+            med_qty:
+              type: integer
+            frequency:
+              type: string
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/purchase-medicine:
+    post:
+      tags:
+      - "Schedule Patient"
+      summary: "purchase medicine patient"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          properties:
+            schedule_checkup_id:
+              type: integer
+            medicine_id:
+              type: integer
+            qty:
+              type: integer
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/medicine/insert:
+    post:
+      tags:
+      - "Medicine"
+      summary: "Add medicine"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          properties:
+            name:
+              type: string
+            mg:
+              type: integer
+            qty:
+              type: integer
+            unit_price:
+              type: integer
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/medicine/update:
+    post:
+      tags:
+      - "Medicine"
+      summary: "Update medicine"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          properties:
+            name:
+              type: string
+            mg:
+              type: integer
+            qty:
+              type: integer
+            unit_price:
+              type: integer
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/medicine/get-total-sale/today:
+    get:
+      tags:
+      - "Medicine"
+      summary: "Get total sales for this day"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/checkup/save:
+    post:
+      tags:
+      - "Patient"
+      summary: "Save patient checkup"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "[
+            sc_checkup_history : {
+              checkup_type_id : '',
+              mh_menarche : '',
+              mh_interval : '',
+              mh_duration : '',
+              mh_ammount : '',
+              mh_symptoms : '',
+              sh_coitarche : '',
+              sh_nop : '',
+              sh_std : '',
+              sh_vaccination : '',
+              sh_others : '',
+              aog_date : '',
+              aog_remarks : '',
+              weight : '',
+              bp : '',
+              cr : '',
+              cr : '',
+              remarks : ''
+            },
+            sc_soap : {
+              schedule_checkup_id : '',
+              s_nausea_vomiting : '',
+              s_nausea_vomiting_remarks : '',
+              s_hypogastric_pain : '',
+              s_hypogastric_pain_remarks : '',
+              s_uterine_contractions : '',
+              s_uterine_contractions_remarks : '',
+              s_bleeding : '',
+              s_bleeding_remarks : '',
+              s_others : '',
+              o_fundic_height : '',
+              o_fundic_height_remarks : '',
+              o_fetal_heart_beat : '',
+              o_fetal_heart_beat_remarks : '',
+              o_others : '',
+              o_others_remarks : '',
+              a_diagnosis : '',
+              p_utz : '',
+              p_blood : '',
+              p_urine : '',
+              p_others : '',
+              p_vaccine_remarks : '',
+              p_monitoring_remarks : ''
+            }
+          ]"
+        400:
+          description: "Invalid status value"
+  /admin/patient/checkup/history-list/:patient_id:
+    get:
+      tags:
+      - "Patient"
+      summary: "Get patient checkup history"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/checkup/history-by-date/:schedule_checkup_id/:date:
+    get:
+      tags:
+      - "Patient"
+      summary: "Get patient checkup history by date"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/upload:
+    post:
+      tags:
+      - "Patient"
+      summary: "Upload file"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          properties:
+            files:
+              type: string
+            test_type:
+              type: string
+            schedule_checkup_id:
+              type: string
+            patient_id:
+              type: string
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/get-patient-confinement/list:
+    get:
+      tags:
+      - "Patient"
+      summary: "Get Patient Confinement List"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/medical-hitory/save:
+    post:
+      tags:
+      - "Patient"
+      summary: "Save/Update Medical History"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "medical_history : {
+              patient_id : '',
+              remarks : '',
+              allergies : '',
+              asthma : '',
+              dm : '',
+              dm_remarks : '',
+              hpn : '',
+              hpn_remarks : '',
+              others_remarks : '',
+              ob_score : '',
+              lmp : '',
+              aog_weeks : '',
+              aog_days : ''
+            },
+            patient_delivery :[ {
+              patient_id: '',
+              year: '',
+              mode_of_delivery : '',
+              place_of_delivery : '',
+              attendant : '',
+              complications : ''
+            },
+             {
+              patient_id: '',
+              year: '',
+              mode_of_delivery : '',
+              place_of_delivery : '',
+              attendant : '',
+              complications : ''
+            }]"
+        400:
+          description: "Invalid status value"
+  /admin/patient/insert:
+    post:
+      tags:
+      - "Patient"
+      summary: "Insert Patient"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/get-list?name=test&page=2&order=asc:
+    get:
+      tags:
+      - "Patient"
+      summary: "Get Patient List"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/get-info/:patient_id:
+    get:
+      tags:
+      - "Patient"
+      summary: "Get Patient Info"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/patient/prescribed-medicine/update/:schedule_checkup_id:
+    post:
+      tags:
+      - "Patient"
+      summary: "Update Prescribed Medicine"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /api/admin/patient-delivery/insert:
+    post:
+      tags:
+      - "Patient"
+      summary: "Save Patient Delivery"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /api/admin/patient-delivery/update/:patient_id:
+    post:
+      tags:
+      - "Patient"
+      summary: "Update Patient Delivery"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /admin/medicine/get-list?name=test&page=2&order=asc:
+    get:
+      tags:
+      - "Medicine"
+      summary: "Get Medicine List"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"
+  /api/admin/patient/get-medical-history/:patient_id:
+    get:
+      tags:
+      - "Patient"
+      summary: "Get Patient Medical History"
+      description: ""
+      consumes:
+      - "application/json"
+      - "application/xml"
+      produces:
+      - "application/xml"
+      - "application/json"
+      responses:
+        200:
+          description: "successful operation"
+        400:
+          description: "Invalid status value"

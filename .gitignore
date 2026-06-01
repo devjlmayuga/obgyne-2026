@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+
+node_modules
+dist
+
+# Never commit service account keys
+src/server/obgyn-google-drive-private-key.js
+
