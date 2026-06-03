@@ -14,6 +14,11 @@ export default function NextClientApp() {
   }
 
   useEffect(() => {
+    if (window.location.pathname === '/') {
+      window.location.replace('/login');
+      return undefined;
+    }
+
     let isMounted = true;
 
     import('./App')
