@@ -1,27 +1,13 @@
 module.exports = {
   db: {
-    // RDS Host
-    // host: 'jacc-ob.cn3nw8jxs51l.ap-southeast-1.rds.amazonaws.com',
-    // user: 'jacc',
-    // database: 'jacc_db',
-
-    // EC2 Host DEV
-    // host: 'ec2-13-229-215-142.ap-southeast-1.compute.amazonaws.com',
-    // user: 'jacc',
-    // database: 'jacc_db',
-
-    // EC2 Host PROD
-    host: 'ec2-47-129-56-116.ap-southeast-1.compute.amazonaws.com',
-    user: 'jacc',
-    database: 'jacc_db',
-
-    // Local Host
-    // host: 'localhost',
-    // user: 'johncarlvino',
-    // database: 'johncarlvino',
-
-    password: 'pass1234',
-    port: 5432
+    host: 'ep-hidden-water-aqg5nssl-pooler.c-8.us-east-1.aws.neon.tech',
+    user: 'neondb_owner',
+    database: 'jacc', // use neondb unless you created a DB named jacc
+    password: 'npg_HJiqt7kcD3mB',
+    port: 5432,
+    ssl: {
+        rejectUnauthorized: false
+      }
   },
   auth: {
     secret: '1a19ef0660bd0ab94d8cfd55c4507c64',
