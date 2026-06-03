@@ -1,34 +1,18 @@
-import React from 'react';
-
-import DefaultLayout from './components/DefaultLayout';
-
-const Dashboard = React.lazy(() => import('./components/Dashboard/Dashboard'));
-const ChangePassword = React.lazy(() =>
-  import('./components/ChangePassword/ChangePassword')
-);
+import Dashboard from './components/Dashboard/Dashboard';
+import ChangePassword from './components/ChangePassword/ChangePassword';
 
 // Inventory Component
-const Inventory = React.lazy(() => import('./components/Inventory/Inventory'));
-const InventoryAddItem = React.lazy(() =>
-  import('./components/Inventory/AddItem')
-);
+import Inventory from './components/Inventory/Inventory';
+import InventoryAddItem from './components/Inventory/AddItem';
 
 // Patient Component
-const PatientForm = React.lazy(() =>
-  import('./components/Patient/PatientForm')
-);
-const PatientSearch = React.lazy(() =>
-  import('./components/Patient/PatientSearch')
-);
-const PatientRegistrationForm = React.lazy(() =>
-  import('./components/Patient/PatientRegistrationForm')
-);
-const PatientNavigationWrapper = React.lazy(() =>
-  import('./components/Patient/PatientNavigationWrapper')
-);
+import PatientForm from './components/Patient/PatientForm';
+import PatientSearch from './components/Patient/PatientSearch';
+import PatientRegistrationForm from './components/Patient/PatientRegistrationForm';
+import PatientNavigationWrapper from './components/Patient/PatientNavigationWrapper';
 
 const routes = [
-  { path: '/', exact: true, name: 'Home', component: DefaultLayout },
+  { path: '/', exact: true, name: 'Home' },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   {
     path: '/changePassword',

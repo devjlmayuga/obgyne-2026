@@ -12,8 +12,14 @@ export const REDUX_SCHEMA_VERSION = 13;
 export const REDUX_DEBOUNCE_INTERVAL = 100; // in milliseconds
 export const REDUX_STORAGE_KEY = 'applicationState';
 const REDUX_DEV_TOOLS = '__REDUX_DEVTOOLS_EXTENSION_COMPOSE__';
+const canUseBrowserStorage = () =>
+  typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
 
 export const getInitialState = () => {
+  if (!canUseBrowserStorage()) {
+    return {};
+  }
+
   const stateJson = localStorage.getItem(REDUX_STORAGE_KEY);
   const state = JSON.parse(stateJson || null) || {};
 
@@ -28,7 +34,7 @@ export const getInitialState = () => {
 
 let enhancers = null;
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
   const composeEnhancers = window[REDUX_DEV_TOOLS] || compose;
 
   enhancers = composeEnhancers(
@@ -40,6 +46,10 @@ if (process.env.NODE_ENV === 'development') {
 
 export const createDefaultStore = (rootState = getInitialState()) => {
   const store = createStore(reduceRoot, rootState, enhancers);
+
+  if (!canUseBrowserStorage()) {
+    return store;
+  }
 
   const saveAppState = () => {
     const state = store.getState();

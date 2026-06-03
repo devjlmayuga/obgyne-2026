@@ -1,4 +1,4 @@
-import React, { Component, Suspense } from 'react';
+import React, { Component } from 'react';
 import { withRouter } from 'react-router';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -21,8 +21,7 @@ import navigation from '../../_nav';
 import routes from '../../routes';
 
 import { userLogout } from '../../actions/actionUserLogin';
-
-const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
+import DefaultHeader from './DefaultHeader';
 
 class DefaultLayout extends Component {
 
@@ -54,24 +53,19 @@ class DefaultLayout extends Component {
         return (
             <div className="app">
                 <AppHeader fixed>
-                    <Suspense  fallback={this.loading()}>
-                        <DefaultHeader onLogout={e=>this.signOut(e)}/>
-                    </Suspense>
+                    <DefaultHeader onLogout={e=>this.signOut(e)}/>
                 </AppHeader>
                 <div className="app-body">
                     <AppSidebar fixed display="lg">
                         <AppSidebarHeader />
                         <AppSidebarForm />
-                        <Suspense>
                         <AppSidebarNav navConfig={navigation} {...this.props} />
-                        </Suspense>
                         <AppSidebarFooter />
                         <AppSidebarMinimizer />
                     </AppSidebar>
                     <main className="main">
                         <AppBreadcrumb appRoutes={routes}/>
                         <Container fluid>
-                        <Suspense fallback={this.loading()}>
                             <Switch>
                             {routes.map((route, idx) => {
                                 return route.component ? (
@@ -86,7 +80,6 @@ class DefaultLayout extends Component {
                                 ) : (null);
                             })}                                                   
                             </Switch>
-                        </Suspense>
                         </Container>
                     </main>
                 </div>                

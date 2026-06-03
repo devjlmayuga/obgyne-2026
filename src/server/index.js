@@ -1,13 +1,13 @@
 const express = require('express');
-const os = require('os');
-const bodyParser = require('body-parser');
 const cors = require('cors');
-const swaggerJSDoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-const swaggerTools = require('swagger-tools');
-const jsyaml = require('js-yaml');
 const fs = require('fs');
 const path = require('path');
+
+const nodeMajorVersion = Number(process.versions.node.split('.')[0]);
+if (nodeMajorVersion !== 24) {
+  console.error(`This server must run on Node.js 24.x. Current version: ${process.version}`);
+  process.exit(1);
+}
 
 // Lightweight .env loader (avoids adding a dependency)
 (() => {
@@ -37,33 +37,71 @@ const path = require('path');
     process.env[key] = value;
   });
 })();
-const spec = fs.readFileSync(
-  path.join('./src/server/', 'api-doc.yaml'),
-  'utf8'
-);
-const swaggerDoc = jsyaml.safeLoad(spec);
 const app = express();
+const distPath = path.resolve(__dirname, '../../dist');
 
-app.use(express.static('dist'));
-app.use(bodyParser.json());
-app.use(express.static('./../../dist'));
+const installServerDomShim = () => {
+  const ElementShim = function ElementShim() {};
+
+  if (typeof global.window === 'undefined') {
+    global.window = {
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      navigator: { userAgent: 'node.js' },
+      requestAnimationFrame: callback => setTimeout(callback, 0),
+      cancelAnimationFrame: id => clearTimeout(id),
+      getComputedStyle: () => ({}),
+      Element: ElementShim,
+      HTMLElement: ElementShim
+    };
+  }
+
+  global.window.Element = global.window.Element || ElementShim;
+  global.window.HTMLElement = global.window.HTMLElement || ElementShim;
+  global.window.requestAnimationFrame =
+    global.window.requestAnimationFrame || (callback => setTimeout(callback, 0));
+  global.window.cancelAnimationFrame =
+    global.window.cancelAnimationFrame || (id => clearTimeout(id));
+  global.window.getComputedStyle = global.window.getComputedStyle || (() => ({}));
+
+  if (typeof global.document === 'undefined') {
+    global.document = {
+      body: { style: {} },
+      documentElement: { style: {} },
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      querySelector: () => ({
+        classList: {
+          add: () => {},
+          remove: () => {},
+          contains: () => false
+        },
+        style: {}
+      }),
+      createElement: () => ({
+        style: {},
+        setAttribute: () => {},
+        removeAttribute: () => {}
+      })
+    };
+  }
+
+  if (typeof global.navigator === 'undefined') {
+    global.navigator = global.window.navigator;
+  }
+
+  global.Element = global.window.Element;
+  global.HTMLElement = global.window.HTMLElement;
+  global.requestAnimationFrame = global.window.requestAnimationFrame;
+  global.cancelAnimationFrame = global.window.cancelAnimationFrame;
+  global.getComputedStyle = global.window.getComputedStyle;
+};
+
+app.use(express.static(distPath));
 
 // added this code for file upload...
 app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb' }));
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-
-// so that the client side can call api on its own port.
-app.use(
-  '/',
-  express.static('./../client', {
-    setHeaders: res => {
-      res.removeHeader('Access-Control-Allow-Origin');
-      res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-    }
-  })
-);
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use(cors());
 app.use('/api/auth', require('./routes/auth.route'));
@@ -87,13 +125,42 @@ app.use(
   require('./routes/admin.patient_vitalsigns.route')
 );
 
-// Initialize the Swagger middleware
-swaggerTools.initializeMiddleware(swaggerDoc, middleware => {
-  app.use(middleware.swaggerValidator());
-  // Serve the Swagger documents and Swagger UI
-  app.use(middleware.swaggerUi());
-});
+const registerSsrRoutes = () => {
+  const ssrBundlePath = path.join(distPath, 'server.js');
+  if (!fs.existsSync(ssrBundlePath)) {
+    throw new Error('SSR bundle is missing. Run `npm run build` before starting the server.');
+  }
 
-app.listen(process.env.PORT || 8080, () =>
-  console.log('Listening on port', process.env.PORT || 8080)
-);
+  installServerDomShim();
+  const { preloadApp, renderPage } = require('../../dist/server.js');
+
+  preloadApp().catch(error => {
+    console.error('Failed to preload SSR application.', error);
+    process.exit(1);
+  });
+
+  app.get('*', (req, res, next) => {
+    try {
+      if (req.path.startsWith('/api/')) {
+        res.status(404).send({ error: 'API route not found' });
+        return;
+      }
+
+      const { context, html } = renderPage(req.url);
+
+      res.status(context.statusCode || 200).send(html);
+    } catch (error) {
+      next(error);
+    }
+  });
+};
+
+registerSsrRoutes();
+
+if (require.main === module) {
+  app.listen(process.env.PORT || 8080, () =>
+    console.log('Listening on port', process.env.PORT || 8080)
+  );
+}
+
+module.exports = app;
