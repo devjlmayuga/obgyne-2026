@@ -14,6 +14,25 @@ const sql = postgres({
   connect_timeout: 30,
 });
 
+function normalizeUndefinedValues(value) {
+  if (value === undefined) {
+    return null;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(normalizeUndefinedValues);
+  }
+
+  if (value && value.constructor === Object) {
+    return Object.keys(value).reduce((normalized, key) => {
+      normalized[key] = normalizeUndefinedValues(value[key]);
+      return normalized;
+    }, {});
+  }
+
+  return value;
+}
+
 /**
  * Returns the singleton connection object with a shim for legacy .query() and .end() methods.
  */
@@ -21,7 +40,7 @@ async function createPoolConnection() {
   // Add .query() shim for legacy DAOs
   if (!sql.query) {
     sql.query = async (text, params) => {
-      const rows = await sql.unsafe(text, params || []);
+      const rows = await sql.unsafe(text, normalizeUndefinedValues(params || []));
       return { rows };
     };
   }
