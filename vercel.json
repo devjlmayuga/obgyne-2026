@@ -1,20 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "functions": {
-    "src/server.js": {
-      "includeFiles": "dist/**"
-    }
-  },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/src/server.js"
-    },
-    {
-      "source": "/((?!.*\\..*).*)",
-      "destination": "/src/server.js"
-    }
-  ]
+  "framework": "nextjs",
+  "buildCommand": "npm run build"
 }

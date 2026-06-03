@@ -19,6 +19,7 @@ import dateFormat from 'dateformat';
 import logo from '../../assets/img/brand/logo.svg';
 import sygnet from '../../assets/img/brand/sygnet.svg';
 import doc from '../../assets/img/doc.png';
+import { assetSrc } from '../../utilities/assetSrc';
 
 import { userLogout } from '../../actions/actionUserLogin';
 
@@ -49,13 +50,13 @@ class DefaultHeader extends Component {
         <AppSidebarToggler className="d-lg-none" display="md" mobile />
         <AppNavbarBrand
           full={{
-            src: logo,
+            src: assetSrc(logo),
             width: 89,
             height: 50,
             alt: 'CoreUI Logo'
           }}
           minimized={{
-            src: sygnet,
+            src: assetSrc(sygnet),
             width: 30,
             height: 30,
             alt: 'CoreUI Logo'
@@ -74,7 +75,7 @@ class DefaultHeader extends Component {
         <Nav className="ml-auto" navbar>
           <AppHeaderDropdown direction="down">
             <DropdownToggle nav right style={{ right: 'auto' }}>
-              <img src={doc} className="img-avatar" alt="avatar" />
+              <img src={assetSrc(doc)} className="img-avatar" alt="avatar" />
             </DropdownToggle>
             <DropdownMenu right style={{ right: 'auto' }}>
               <DropdownItem header tag="div" className="text-center">

@@ -9,6 +9,7 @@ import { Card, CardBody, Table, Button } from 'reactstrap';
 
 // image
 import patientA from '../../assets/img/patient.png';
+import { assetSrc } from '../../utilities/assetSrc';
 
 // action
 import {
@@ -77,7 +78,7 @@ class PatientConfinement extends Component {
             <td className="text-center">
               <div className="avatar">
                 <img
-                  src={patientA}
+                  src={assetSrc(patientA)}
                   className="img-avatar"
                   alt="admin@bootstrapmaster.com"
                 />
