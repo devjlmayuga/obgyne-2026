@@ -16,18 +16,3 @@ const NextClientApp = dynamic(() => import('../src/client/NextClientApp'), {
 export default function CatchAllPage() {
   return <NextClientApp />;
 }
-
-export function getServerSideProps({ resolvedUrl }) {
-  if (resolvedUrl === '/') {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false
-      }
-    };
-  }
-
-  return {
-    props: {}
-  };
-}
