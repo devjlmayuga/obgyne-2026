@@ -1,13 +1,13 @@
 module.exports = {
   db: {
-    host: 'ep-hidden-water-aqg5nssl-pooler.c-8.us-east-1.aws.neon.tech',
-    user: 'neondb_owner',
-    database: 'jacc', // use neondb unless you created a DB named jacc
-    password: 'npg_HJiqt7kcD3mB',
-    port: 5432,
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: parseInt(process.env.DB_PORT || '5432', 10),
     ssl: {
-        rejectUnauthorized: false
-      }
+      rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true'
+    }
   },
   auth: {
     secret: '1a19ef0660bd0ab94d8cfd55c4507c64',

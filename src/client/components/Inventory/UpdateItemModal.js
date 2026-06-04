@@ -25,15 +25,52 @@ class UpdateItemModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      stockAction: 'add',
       totalQty: null
     };
     this.submitForm = this.submitForm.bind(this);
     this.toggleUpdateItem = this.toggleUpdateItem.bind(this);
+    this.handleStockActionChange = this.handleStockActionChange.bind(this);
   }
 
-  computeTotalQty(qty) {
+  componentDidUpdate(prevProps) {
+    const previousItem = prevProps.selectedItem || {};
+    const currentItem = this.props.selectedItem || {};
+    const openedModal = !prevProps.displayModal && this.props.displayModal;
+    const changedItem = previousItem.medicine_id !== currentItem.medicine_id;
+
+    if (openedModal || changedItem) {
+      this.setState({
+        stockAction: 'add',
+        totalQty: null
+      });
+    }
+  }
+
+  getUpdatedTotalQty(qty, stockAction = this.state.stockAction) {
+    const currentQty = parseInt(this.props.selectedItem.qty, 10) || 0;
+    const itemQty = parseInt(qty || 0, 10) || 0;
+
+    if (stockAction === 'less') {
+      return currentQty - itemQty;
+    }
+
+    return currentQty + itemQty;
+  }
+
+  computeTotalQty(qty, stockAction = this.state.stockAction) {
     this.setState({
-      totalQty: parseInt(qty || 0) + parseInt(this.props.selectedItem.qty)
+      totalQty: this.getUpdatedTotalQty(qty, stockAction)
+    });
+  }
+
+  handleStockActionChange(event) {
+    const stockAction = event.target.value;
+    const addQty = this.props.formValues && this.props.formValues.addQty;
+
+    this.setState({
+      stockAction,
+      totalQty: this.getUpdatedTotalQty(addQty, stockAction)
     });
   }
 
@@ -63,17 +100,21 @@ class UpdateItemModal extends Component {
   submitForm(formValues) {
     const {
       medicine_id,
-      qty,
       addQty,
       description,
       name,
       unit_price
     } = formValues;
+    const updatedQty = this.getUpdatedTotalQty(addQty);
+
+    if (updatedQty < 0) {
+      return;
+    }
 
     const requestData = {
       medicine_id: medicine_id,
       name: name,
-      qty: parseInt(qty) + parseInt(addQty || 0),
+      qty: updatedQty,
       description: description,
       unit_price: unit_price
     };
@@ -93,6 +134,9 @@ class UpdateItemModal extends Component {
     if (!selectedItem) {
       return '';
     }
+    const totalQty =
+      this.state.totalQty === null ? selectedItem.qty : this.state.totalQty;
+    const hasInvalidTotal = totalQty < 0;
 
     return (
       <Modal
@@ -123,11 +167,25 @@ class UpdateItemModal extends Component {
             <FormGroup row className="my-0">
               <Col xs="6" sm="6" md="4" lg="3">
                 <FormGroup>
+                  <Label htmlFor="stock-action">Action</Label>
+                  <Input
+                    type="select"
+                    id="stock-action"
+                    value={this.state.stockAction}
+                    onChange={this.handleStockActionChange}
+                  >
+                    <option value="add">Add</option>
+                    <option value="less">Less</option>
+                  </Input>
+                </FormGroup>
+              </Col>
+              <Col xs="6" sm="6" md="4" lg="3">
+                <FormGroup>
                   <Label htmlFor="quantity">No. of Items</Label>
                   <Field
                     component={this.renderTextField}
                     name="addQty"
-                    placeholder="Enter qty to be added"
+                    placeholder="Enter qty"
                     onChange={event => {
                       this.computeTotalQty(event.target.value);
                     }}
@@ -147,10 +205,15 @@ class UpdateItemModal extends Component {
             </FormGroup>
             <p className="help-block">
               New Total Stocks:{' '}
-              <Badge pill color="danger">
-                {this.state.totalQty || selectedItem.qty}
+              <Badge pill color={hasInvalidTotal ? 'warning' : 'danger'}>
+                {totalQty}
               </Badge>
             </p>
+            {hasInvalidTotal && (
+              <p className="text-danger">
+                No. of Items cannot be greater than current stocks.
+              </p>
+            )}
             <FormGroup>
               <Label htmlFor="text-input">Description</Label>
               <Field
@@ -164,6 +227,7 @@ class UpdateItemModal extends Component {
             <Button
               type="submit"
               color="primary"
+              disabled={hasInvalidTotal}
               // onClick={this.props.onToggleUpdateModal}
             >
               Update
