@@ -33,11 +33,11 @@ export function fetchTodayMedSalesList(token, callback) {
   });
 }
 
-export function fetchInventoryList(term, callback) {
+export function fetchInventoryList(term, callback, page = 1, limit = 10) {
   return new Promise((resolve, reject) => {
     const url = `${API_URL}/api/admin/medicine/get-list?name=${encodeTextToUri(
       term
-    )}&order=asc`;
+    )}&order=asc&page=${page}&limit=${limit}`;
     const promise = httpMethod(url, 'get');
     let success = true;
     promise

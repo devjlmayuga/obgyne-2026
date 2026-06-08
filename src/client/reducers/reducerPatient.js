@@ -36,7 +36,12 @@ export default function(state = initialState, action) {
         confinementList: action.payload
       };
     case PATIENT_LIST:
-      const patientList = _.orderBy(action.payload, 'patient_name', 'asc');
+      const patientList = _.isArray(action.payload)
+        ? _.orderBy(action.payload, 'patient_name', 'asc')
+        : {
+            ...action.payload,
+            data: _.orderBy(action.payload && action.payload.data, 'patient_name', 'asc')
+          };
       return {
         ...state,
         patientList
@@ -67,14 +72,27 @@ export default function(state = initialState, action) {
         checkupHistory: action.payload
       };
     case PATIENT_CHECKUP_LIST:
+      const checkupPayload = _.isArray(action.payload)
+        ? { data: action.payload }
+        : action.payload || { data: [] };
+      const existingCheckupList = action.append ? state.patientCheckupList || [] : [];
       const checkupList = _.orderBy(
-        action.payload,
+        _.uniqBy(
+          [...existingCheckupList, ...(checkupPayload.data || [])],
+          'schedule_checkup_id'
+        ),
         'schedule_checkup_id',
         'desc'
       );
       return {
         ...state,
-        patientCheckupList: checkupList
+        patientCheckupList: checkupList,
+        patientCheckupMeta: {
+          total: checkupPayload.total || checkupList.length,
+          page: checkupPayload.page || 1,
+          limit: checkupPayload.limit || 10,
+          hasMore: checkupPayload.hasMore || false
+        }
       };
     case PATIENT_SCHED:
       return {

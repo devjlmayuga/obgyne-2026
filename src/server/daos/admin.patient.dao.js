@@ -70,40 +70,61 @@ async function getPatientList(query) {
   const poolConnection = await dbConnection.createPoolConnection(); // always start db connection
   let i = 1;
   let params = [];
-  let queryString = '';
+  let whereString = 'WHERE is_deleted is false';
+  let orderString = 'ORDER BY patient_name ASC';
+  let pageString = '';
+  let page = 1;
+  let limit = 10;
   if (query) {
     if (query.name) {
-      queryString += ` patient_name ILIKE $${i++} `;
+      whereString += ` AND patient_name ILIKE $${i++}`;
       params.push(`%${query.name}%`);
     }
 
     if (query.order) {
       if (query.order == 'asc') {
-        queryString += ` ORDER BY patient_name ASC`;
+        orderString = `ORDER BY patient_name ASC`;
       }
 
       if (query.order == 'desc') {
-        queryString += ` ORDER BY patient_name DESC`;
+        orderString = `ORDER BY patient_name DESC`;
       }
     }
 
     if (query.page) {
-      let limit = query.page * 10 - 10;
-      queryString += ` LIMIT 10 OFFSET $${i++}`;
-      params.push(limit);
+      page = Math.max(parseInt(query.page, 10) || 1, 1);
+    }
+
+    if (query.limit) {
+      limit = Math.max(parseInt(query.limit, 10) || 10, 1);
     }
   }
 
+  const offset = (page - 1) * limit;
+  pageString = `LIMIT $${i++} OFFSET $${i++}`;
+  params.push(limit, offset);
+
   const queryText = `
-    SELECT * FROM ob.patient where is_deleted is false ${
-      query.name ? ' and ' : ''
-    } ${queryString ? queryString : ''} 
+    SELECT * FROM ob.patient ${whereString} ${orderString} ${pageString}
+  `;
+
+  const countParams = params.slice(0, params.length - 2);
+  const countQueryText = `
+    SELECT COUNT(*) FROM ob.patient ${whereString}
   `;
 
   try {
     const { rows } = await poolConnection.query(queryText, params);
+    const countResult = await poolConnection.query(countQueryText, countParams);
+    const total = parseInt(countResult.rows[0].count, 10);
     await poolConnection.end(); // always close db connection
-    return rows;
+    return {
+      data: rows,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    };
   } catch (error) {
     console.log(error);
     await poolConnection.end(); // always close db connection

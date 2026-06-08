@@ -1799,16 +1799,27 @@ async function getPatientCheckupHistoryBackup(patientId, res) {
 }
 
 
-async function getPatientCheckupHistory(patientId, res) {
+async function getPatientCheckupHistory(patientId, query, res) {
   try {
     console.log('Entering getPatientCheckupHistory service');
 
-    const patientHistoryDateRes = await scheduleCheckupDao.getPatientHistoryDateList(patientId);
+    const patientHistoryDateRes = await scheduleCheckupDao.getPatientHistoryDateList(patientId, query);
     if (patientHistoryDateRes.err) {
       return res.status(400).send(patientHistoryDateRes.err);
     }
 
-    const scheduleCheckupIds = patientHistoryDateRes.map(info => parseInt(info.schedule_checkup_id));
+    const patientHistoryDateList = patientHistoryDateRes.data || [];
+    const scheduleCheckupIds = patientHistoryDateList.map(info => parseInt(info.schedule_checkup_id));
+
+    if (scheduleCheckupIds.length === 0) {
+      return res.status(200).send({
+        data: [],
+        total: patientHistoryDateRes.total || 0,
+        page: patientHistoryDateRes.page || 1,
+        limit: patientHistoryDateRes.limit || 10,
+        hasMore: false
+      });
+    }
 
     // Fetch all related data in parallel to minimize DB calls
     const [
@@ -1822,10 +1833,11 @@ async function getPatientCheckupHistory(patientId, res) {
     ]);
 
     // Use map function instead of makeMap
-    const finalResponse = patientHistoryDateRes.map(info => {
-      const sc_checkup_history = checkupHistories.find(ch => ch.schedule_checkup_id === info.schedule_checkup_id) || null;
-      const sc_soap = soapRecords.find(soap => soap.schedule_checkup_id === info.schedule_checkup_id) || null;
-      const sc_prescribed_medicine = prescribedMeds.filter(med => med.schedule_checkup_id === info.schedule_checkup_id) || [];
+    const finalResponse = patientHistoryDateList.map(info => {
+      const scheduleCheckupId = parseInt(info.schedule_checkup_id);
+      const sc_checkup_history = checkupHistories.find(ch => ch.schedule_checkup_id === scheduleCheckupId) || null;
+      const sc_soap = soapRecords.find(soap => soap.schedule_checkup_id === scheduleCheckupId) || null;
+      const sc_prescribed_medicine = prescribedMeds.filter(med => med.schedule_checkup_id === scheduleCheckupId) || [];
 
       return {
         ...info,
@@ -1836,7 +1848,13 @@ async function getPatientCheckupHistory(patientId, res) {
     });
 
     console.log(finalResponse.length);
-    res.status(200).send(finalResponse);
+    res.status(200).send({
+      data: finalResponse,
+      total: patientHistoryDateRes.total,
+      page: patientHistoryDateRes.page,
+      limit: patientHistoryDateRes.limit,
+      hasMore: patientHistoryDateRes.hasMore
+    });
   } catch (error) {
     console.error('Error in getPatientCheckupHistory:', error);
     res.status(500).send({ error: 'Internal Server Error' });

@@ -16,7 +16,12 @@ export default function(state = initialState, action) {
         medSalesList: action.payload
       };
     case INVENTORY_LIST:
-      const inventory = _.orderBy(action.payload, 'name', 'asc');
+      const inventory = _.isArray(action.payload)
+        ? _.orderBy(action.payload, 'name', 'asc')
+        : {
+            ...action.payload,
+            data: _.orderBy(action.payload && action.payload.data, 'name', 'asc')
+          };
       return {
         ...state,
         inventory

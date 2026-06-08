@@ -205,7 +205,7 @@ async function isPatientDelivered(req, res) {
 async function getPatientCheckupHistory(req, res) {
   console.log('entering getPatientCheckupHistory route');
   const patient_id = req.params.patient_id;
-  await patientService.getPatientCheckupHistory(patient_id, res);
+  await patientService.getPatientCheckupHistory(patient_id, req.query, res);
 }
 
 

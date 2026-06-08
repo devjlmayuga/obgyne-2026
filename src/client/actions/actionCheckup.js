@@ -26,26 +26,32 @@ export function fetchCheckUpHistory(id, callback) {
         callback(success);
       })
       .catch(() => {
+        resolve({
+          type: CHECKUP_HISTORY,
+          payload: []
+        });
         callback(false);
       });
   });
 }
 
-export function fetchCheckUpList(id, callback) {
+export function fetchCheckUpList(id, callback, page = 1, limit = 10, append = false) {
   return new Promise(resolve => {
-    const url = `${API_URL}/api/admin/patient/checkup-history/${id}`;
+    const url = `${API_URL}/api/admin/patient/checkup-history/${id}?page=${page}&limit=${limit}`;
     const promise = httpMethod(url, 'get');
     promise
       .then(response => {
         let success = true;
         let someData = {
           type: PATIENT_CHECKUP_LIST,
-          payload: response
+          payload: response,
+          append
         };
         if (response.error) {
           someData = {
             type: PATIENT_CHECKUP_LIST,
-            payload: []
+            payload: [],
+            append
           };
           success = false;
         }
@@ -53,6 +59,11 @@ export function fetchCheckUpList(id, callback) {
         callback(success);
       })
       .catch(() => {
+        resolve({
+          type: PATIENT_CHECKUP_LIST,
+          payload: [],
+          append
+        });
         callback(false);
       });
   });

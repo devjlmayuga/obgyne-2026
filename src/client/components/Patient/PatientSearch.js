@@ -12,7 +12,10 @@ import {
   CardHeader,
   Col,
   Row,
-  Button
+  Button,
+  Pagination,
+  PaginationItem,
+  PaginationLink
 } from 'reactstrap';
 
 // action
@@ -34,7 +37,11 @@ class PatientSearch extends Component {
 
     this.state = {
       term: '',
-      patientList: {},
+      patientList: [],
+      currentPage: 1,
+      pageSize: 10,
+      totalPatients: 0,
+      totalPages: 0,
       isLoading: false,
       isAlert: false,
       alertHasYesNo: false,
@@ -44,18 +51,48 @@ class PatientSearch extends Component {
       alertOnNo: () => {}
     };
 
-    this.patientSearch('');
-
     this.removePatient = this.removePatient.bind(this);
+    this.changePage = this.changePage.bind(this);
+    this.patientSearchDebounced = _.debounce(term => {
+      this.patientSearch(term, 1);
+    }, 300);
   }
 
-  patientSearch(term) {
-    this.props.fetchPatientList(term, patientList => {
+  componentDidMount() {
+    this.patientSearch('', 1);
+  }
+
+  patientSearch(term, page = 1) {
+    const { pageSize } = this.state;
+
+    this.setState({
+      term,
+      currentPage: page,
+      isLoading: true
+    });
+
+    this.props.fetchPatientList(term, response => {
+      const payload = response || {};
+      const patientList = _.isArray(payload) ? payload : payload.data;
+
       this.setState({
-        patientList,
+        patientList: patientList || [],
+        totalPatients: payload.total || (patientList && patientList.length) || 0,
+        totalPages: payload.totalPages || 1,
+        currentPage: payload.page || page,
         isLoading: false
       });
-    });
+    }, page, pageSize);
+  }
+
+  changePage(page) {
+    const { term, currentPage, totalPages } = this.state;
+
+    if (page < 1 || page > totalPages || page === currentPage) {
+      return;
+    }
+
+    this.patientSearch(term, page);
   }
 
   schedulePatient(patient_id) {
@@ -91,7 +128,7 @@ class PatientSearch extends Component {
     const onYes = () => {
       onNo();
       this.props.deletePatient(patient_id, () => {
-        this.patientSearch('');
+        this.patientSearch(this.state.term, this.state.currentPage);
       });
     };
 
@@ -114,17 +151,13 @@ class PatientSearch extends Component {
   }
 
   render() {
-    const patientSearch = _.debounce(term => {
-      this.patientSearch(term);
-    }, 300);
-
-    let { patientList } = this.state;
+    let { patientList, currentPage, totalPages, totalPatients } = this.state;
     let patients = [];
 
     if (_.isArray(patientList)) {
       patients = _.map(patientList, (patient, index) => {
         return (
-          <tr key={index}>
+          <tr key={patient.patient_id || index}>
             <td>{patient.patient_name}</td>
             <td>
               {moment(patient.birth_date)
@@ -181,6 +214,21 @@ class PatientSearch extends Component {
       alertOnNo
     } = this.state;
 
+    const paginationItems = [];
+    const firstPage = Math.max(currentPage - 2, 1);
+    const lastPage = Math.min(firstPage + 4, totalPages);
+    const startPage = Math.max(lastPage - 4, 1);
+
+    for (let page = startPage; page <= lastPage; page += 1) {
+      paginationItems.push(
+        <PaginationItem key={page} active={page === currentPage}>
+          <PaginationLink onClick={() => this.changePage(page)}>
+            {page}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
     return (
       <div className="animated fadeIn">
         <Row>
@@ -200,7 +248,7 @@ class PatientSearch extends Component {
               <CardBody>
                 <SearchBar
                   placeholder="Enter patient name..."
-                  onSearchTermChange={patientSearch}
+                  onSearchTermChange={this.patientSearchDebounced}
                 />
                 <Table
                   hover
@@ -217,6 +265,29 @@ class PatientSearch extends Component {
                   </thead>
                   <tbody>{patients}</tbody>
                 </Table>
+                {totalPages > 1 && (
+                  <div className="d-flex justify-content-between align-items-center mt-3">
+                    <small className="text-muted">
+                      Showing page {currentPage} of {totalPages} ({totalPatients}{' '}
+                      patients)
+                    </small>
+                    <Pagination className="mb-0">
+                      <PaginationItem disabled={currentPage === 1}>
+                        <PaginationLink
+                          previous
+                          onClick={() => this.changePage(currentPage - 1)}
+                        />
+                      </PaginationItem>
+                      {paginationItems}
+                      <PaginationItem disabled={currentPage === totalPages}>
+                        <PaginationLink
+                          next
+                          onClick={() => this.changePage(currentPage + 1)}
+                        />
+                      </PaginationItem>
+                    </Pagination>
+                  </div>
+                )}
               </CardBody>
             </Card>
           </Col>

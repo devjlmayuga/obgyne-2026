@@ -92,11 +92,11 @@ export function fetchPatientConfinementList(token, callback) {
   });
 }
 
-export function fetchPatientList(term, callback) {
+export function fetchPatientList(term, callback, page = 1, limit = 10) {
   return new Promise((resolve, reject) => {
     const url = `${API_URL}/api/admin/patient/get-list?name=${encodeTextToUri(
       term
-    )}&order=asc`;
+    )}&order=asc&page=${page}&limit=${limit}`;
     const promise = httpMethod(url, 'get');
     let success = true;
     promise

@@ -116,19 +116,34 @@ async function getCheckupHistoryViaScheduleCheckupId(scheduleCheckupId) {
 /**
  *
  */
-async function getPatientHistoryDateList(patientId) {
+async function getPatientHistoryDateList(patientId, options = {}) {
   console.log('entering getPatientHistoryDateList dao');
   const poolConnection = await dbConnection.createPoolConnection(); // always start db connection
+  const page = Math.max(parseInt(options.page, 10) || 1, 1);
+  const limit = Math.max(parseInt(options.limit, 10) || 10, 1);
+  const offset = (page - 1) * limit;
   const queryText = `
   select schedule_checkup_id, patient_id, to_char(last_edit_date, 'mm-dd-yyyy') AS checkup_date
     from ob.schedule_checkup where patient_id = $1
   order by schedule_checkup_id desc
+  LIMIT $2 OFFSET $3
   `;
-  const params = [patientId];
+  const countQueryText = `
+    SELECT COUNT(*) FROM ob.schedule_checkup WHERE patient_id = $1
+  `;
+  const params = [patientId, limit, offset];
   try {
     const { rows } = await poolConnection.query(queryText, params);
+    const countResult = await poolConnection.query(countQueryText, [patientId]);
+    const total = parseInt(countResult.rows[0].count, 10);
     await poolConnection.end(); // always close db connection
-    return rows;
+    return {
+      data: rows,
+      total,
+      page,
+      limit,
+      hasMore: page * limit < total
+    };
   } catch (error) {
     console.log(error);
     await poolConnection.end(); // always close db connection

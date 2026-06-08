@@ -52,7 +52,7 @@ const ItemList = props => {
       props.displayPurchaseButton;
 
       return (
-        <tr key={index}>
+        <tr key={med.medicine_id || index}>
           <td>{name}</td>
           <td>{qty}</td>
           <td>&#x20B1; {unit_price}</td>
