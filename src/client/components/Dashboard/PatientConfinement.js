@@ -110,7 +110,7 @@ class PatientConfinement extends Component {
     }
 
     return (
-      <Card>
+      <div>
         <Alert
           isOpen={this.state.alert}
           message={this.state.alertMsg}
@@ -120,7 +120,7 @@ class PatientConfinement extends Component {
           onNo={() => this.closeAlert()}
         />
         <Loader isOpen={this.state.loader} />
-        <CardBody>
+        <div>
           <Table
             hover
             responsive
@@ -136,8 +136,8 @@ class PatientConfinement extends Component {
             </thead>
             <tbody>{patientList}</tbody>
           </Table>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
     );
   }
 }

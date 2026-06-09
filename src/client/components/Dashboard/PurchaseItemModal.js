@@ -37,7 +37,7 @@ class PurchaseItemModal extends Component {
 
     this.state = {
       term: '',
-      inventoryList: {},
+      inventoryList: [],
       isLoading: false,
       cartList: [],
       isAlert: false,
@@ -60,9 +60,12 @@ class PurchaseItemModal extends Component {
   }
 
   inventorySearch(term) {
-    this.props.fetchInventoryList(term, inventoryList => {
+    this.props.fetchInventoryList(term, response => {
+      const payload = response || {};
+      const inventoryList = _.isArray(payload) ? payload : payload.data;
+
       this.setState({
-        inventoryList,
+        inventoryList: inventoryList || [],
         isLoading: false
       });
     });

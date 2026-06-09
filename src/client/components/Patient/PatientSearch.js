@@ -30,6 +30,7 @@ import { fetchCheckUpList } from '../../actions/actionCheckup';
 // component
 import SearchBar from '../ReusableComp/SearchBar';
 import { Loader, Alert } from '../Utilities/Modals';
+import PatientRegistrationModal from './PatientRegistrationModal';
 
 class PatientSearch extends Component {
   constructor(props) {
@@ -43,6 +44,7 @@ class PatientSearch extends Component {
       totalPatients: 0,
       totalPages: 0,
       isLoading: false,
+      isRegistrationModal: false,
       isAlert: false,
       alertHasYesNo: false,
       alertClassName: 'modal-primary',
@@ -53,6 +55,7 @@ class PatientSearch extends Component {
 
     this.removePatient = this.removePatient.bind(this);
     this.changePage = this.changePage.bind(this);
+    this.toggleRegistrationModal = this.toggleRegistrationModal.bind(this);
     this.patientSearchDebounced = _.debounce(term => {
       this.patientSearch(term, 1);
     }, 300);
@@ -60,6 +63,34 @@ class PatientSearch extends Component {
 
   componentDidMount() {
     this.patientSearch('', 1);
+
+    if (this.props.location.pathname === '/patient/register') {
+      this.setState({ isRegistrationModal: true });
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.location.pathname !== this.props.location.pathname) {
+      this.setState({
+        isRegistrationModal:
+          this.props.location.pathname === '/patient/register'
+      });
+    }
+  }
+
+  toggleRegistrationModal() {
+    const nextIsRegistrationModal = !this.state.isRegistrationModal;
+
+    this.setState({
+      isRegistrationModal: nextIsRegistrationModal
+    });
+
+    if (
+      !nextIsRegistrationModal &&
+      this.props.location.pathname === '/patient/register'
+    ) {
+      this.props.history.push('/patient');
+    }
   }
 
   patientSearch(term, page = 1) {
@@ -96,19 +127,53 @@ class PatientSearch extends Component {
   }
 
   schedulePatient(patient_id) {
-    var reply = confirm('Schedule patient?');
-    if (reply) {
+    const closeAlert = () => {
+      this.setState({
+        isAlert: false,
+        alertHasYesNo: false,
+        alertClassName: 'modal-primary',
+        alertMessage: '',
+        alertOnYes: () => {},
+        alertOnNo: () => {}
+      });
+    };
+
+    const onYes = () => {
+      closeAlert();
       this.props.schedulePatient(
         { patient_id, status_id: 8, in_dashboard: true },
         success => {
           if (success) {
-            alert('Patient successfully scheduled!');
+            this.setState({
+              isAlert: true,
+              alertHasYesNo: false,
+              alertClassName: 'modal-success',
+              alertMessage: 'Patient successfully scheduled!',
+              alertOnYes: () => {},
+              alertOnNo: () => {}
+            });
           } else {
-            alert('Request failed!');
+            this.setState({
+              isAlert: true,
+              alertHasYesNo: false,
+              alertClassName: 'modal-danger',
+              alertMessage: 'Request failed!',
+              alertOnYes: () => {},
+              alertOnNo: () => {}
+            });
           }
         }
       );
-    }
+    };
+
+    this.setState({
+      isAlert: true,
+      alertHasYesNo: true,
+      alertClassName: 'modal-warning',
+      alertMessage: 'Schedule patient?',
+      alertOnNo: closeAlert,
+      alertOnYes: onYes
+    });
   }
 
   removePatient(patient) {
@@ -206,6 +271,7 @@ class PatientSearch extends Component {
 
     const {
       isLoading,
+      isRegistrationModal,
       isAlert,
       alertMessage,
       alertClassName,
@@ -238,10 +304,11 @@ class PatientSearch extends Component {
                 <strong>Search Patient</strong>
                 <div className="card-header-actions">
                   <Button
-                    color="link"
-                    className="card-header-action btn-setting"
+                    color="primary"
+                    size="sm"
+                    onClick={this.toggleRegistrationModal}
                   >
-                    <i className="fa fa-plus-square" title="Add new?" />
+                    <i className="fa fa-plus-square" /> Register Patient
                   </Button>
                 </div>
               </CardHeader>
@@ -302,6 +369,11 @@ class PatientSearch extends Component {
           }}
           onYes={alertOnYes}
           onNo={alertOnNo}
+        />
+        <PatientRegistrationModal
+          displayModal={isRegistrationModal}
+          onToggleRegistrationModal={this.toggleRegistrationModal}
+          onSaved={() => this.patientSearch('', 1)}
         />
         <Loader isOpen={isLoading} />
       </div>

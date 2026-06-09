@@ -70,24 +70,24 @@ async function getPatientList(query) {
   const poolConnection = await dbConnection.createPoolConnection(); // always start db connection
   let i = 1;
   let params = [];
-  let whereString = 'WHERE is_deleted is false';
-  let orderString = 'ORDER BY patient_name ASC';
+  let whereString = 'WHERE COALESCE(patient.is_deleted, false) = false';
+  let orderString = 'ORDER BY patient.patient_name ASC';
   let pageString = '';
   let page = 1;
   let limit = 10;
   if (query) {
     if (query.name) {
-      whereString += ` AND patient_name ILIKE $${i++}`;
+      whereString += ` AND patient.patient_name ILIKE $${i++}`;
       params.push(`%${query.name}%`);
     }
 
     if (query.order) {
       if (query.order == 'asc') {
-        orderString = `ORDER BY patient_name ASC`;
+        orderString = `ORDER BY patient.patient_name ASC`;
       }
 
       if (query.order == 'desc') {
-        orderString = `ORDER BY patient_name DESC`;
+        orderString = `ORDER BY patient.patient_name DESC`;
       }
     }
 
@@ -105,12 +105,12 @@ async function getPatientList(query) {
   params.push(limit, offset);
 
   const queryText = `
-    SELECT * FROM ob.patient ${whereString} ${orderString} ${pageString}
+    SELECT patient.* FROM ob.patient AS patient ${whereString} ${orderString} ${pageString}
   `;
 
   const countParams = params.slice(0, params.length - 2);
   const countQueryText = `
-    SELECT COUNT(*) FROM ob.patient ${whereString}
+    SELECT COUNT(*) FROM ob.patient AS patient ${whereString}
   `;
 
   try {

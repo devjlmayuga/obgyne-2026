@@ -168,7 +168,7 @@ class TodaysPatientsList extends Component {
     }
 
     return (
-      <Card>
+      <div>
         <Alert
           isOpen={this.state.alert}
           message={this.state.alertMsg}
@@ -178,7 +178,7 @@ class TodaysPatientsList extends Component {
           onNo={() => this.closeAlert()}
         />
         <Loader isOpen={this.state.loader} />
-        <CardBody>
+        <div>
           <Table
             hover
             responsive
@@ -194,8 +194,8 @@ class TodaysPatientsList extends Component {
             </thead>
             <tbody>{items}</tbody>
           </Table>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
     );
   }
 }

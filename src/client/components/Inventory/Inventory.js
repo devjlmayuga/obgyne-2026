@@ -29,6 +29,7 @@ import { Loader } from '../Utilities/Modals';
 import UpdateItemModal from './UpdateItemModal';
 import ItemList from './ItemList';
 import DeleteItemModal from './DeleteItemModal';
+import AddItemModal from './AddItemModal';
 
 class Inventory extends Component {
   constructor(props) {
@@ -42,17 +43,47 @@ class Inventory extends Component {
       totalItems: 0,
       totalPages: 0,
       isLoading: true,
+      isAddItem: false,
       isUpdateItem: false,
       isDeleteItem: false,
       selectedItem: {}
     };
 
+    this.toggleAddItem = this.toggleAddItem.bind(this);
     this.toggleUpdateItem = this.toggleUpdateItem.bind(this);
     this.toggleDeleteItem = this.toggleDeleteItem.bind(this);
     this.changePage = this.changePage.bind(this);
     this.inventorySearchDebounced = _.debounce(term => {
       this.inventorySearch(term, 1);
     }, 300);
+  }
+
+  componentDidMount() {
+    this.inventorySearch('', 1);
+
+    if (this.props.location.pathname === '/inventory/add') {
+      this.setState({ isAddItem: true });
+    }
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.location.pathname !== this.props.location.pathname) {
+      this.setState({
+        isAddItem: this.props.location.pathname === '/inventory/add'
+      });
+    }
+  }
+
+  toggleAddItem() {
+    const nextIsAddItem = !this.state.isAddItem;
+
+    this.setState({
+      isAddItem: nextIsAddItem
+    });
+
+    if (!nextIsAddItem && this.props.location.pathname === '/inventory/add') {
+      this.props.history.push('/inventory');
+    }
   }
 
   toggleUpdateItem(med) {
@@ -90,10 +121,6 @@ class Inventory extends Component {
         isLoading: false
       });
     }, page, pageSize);
-  }
-
-  componentDidMount() {
-    this.inventorySearch('', 1);
   }
 
   changePage(page) {
@@ -145,10 +172,11 @@ class Inventory extends Component {
                   <strong>Inventory</strong>
                   <div className="card-header-actions">
                     <Button
-                      color="link"
-                      className="card-header-action btn-setting"
+                      color="primary"
+                      size="sm"
+                      onClick={this.toggleAddItem}
                     >
-                      {/* <i className="fa fa-plus-square" title="Add new?" /> */}
+                      <i className="fa fa-plus-square" /> Add New Item
                     </Button>
                   </div>
                 </CardHeader>
@@ -213,6 +241,11 @@ class Inventory extends Component {
           updateList={() =>
             this.inventorySearch(this.state.term, this.state.currentPage)
           }
+        />
+        <AddItemModal
+          displayModal={this.state.isAddItem}
+          onToggleAddModal={this.toggleAddItem}
+          updateList={() => this.inventorySearch('', 1)}
         />
         <Loader isOpen={isLoading} />
       </div>

@@ -46,8 +46,8 @@ class MedicineSales extends Component {
     }
 
     return (
-      <Card>
-        <CardBody>
+      <div>
+        <div>
           <Table
             hover
             responsive
@@ -78,8 +78,8 @@ class MedicineSales extends Component {
               </tr>
             </tbody>
           </Table>
-        </CardBody>
-      </Card>
+        </div>
+      </div>
     );
   }
 }
