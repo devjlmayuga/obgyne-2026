@@ -309,11 +309,14 @@ INSERT INTO ob.user (uname, pword, last_name, first_name, user_type_id)
 VALUES
 (	
 	'admin',
-	'pass1234',
+	md5('pass1234'),
 	'admin',
 	'user', 
 	(SELECT look_up_id FROM ob.look_up WHERE value = 'systemAdmin')
 );
+
+UPDATE ob.user
+SET pword = md5(pword)
+WHERE pword IS NOT NULL
+  AND pword !~ '^[a-f0-9]{32}$';
 --------------- END LOOKUP ---------------
-
-

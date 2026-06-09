@@ -34,7 +34,10 @@ async function resetPassword(user, res) {
     if(!isUserExist){
       res.status(400).send('Incorrect username or password');
     } else {
-      const restPassResult = await userDao.resetPassword(user.new_password);
+      const restPassResult = await userDao.resetPassword(
+        user.username,
+        user.new_password
+      );
 
       if(restPassResult.err){
         res.status(400).send(restPassResult.err);
