@@ -1,247 +1,125 @@
-# simple-react-full-stack
+# OB-GYNE Clinic Management System
 
-[![Build Status](https://travis-ci.org/crsandeep/simple-react-full-stack.svg?branch=master)](https://travis-ci.org/crsandeep/simple-react-full-stack)
-[![Greenkeeper badge](https://badges.greenkeeper.io/crsandeep/simple-react-full-stack.svg)](https://greenkeeper.io/)
+OB-GYNE is a full-stack clinic management application for obstetrics and gynecology practices. It gives authorized staff one place to manage patients and their medical records, schedule checkups, record diagnoses and vital signs, track deliveries, and maintain medicine inventory and purchases.
 
-This is a boilerplate to build a full stack web application using React, Node.js, Express and Webpack. It is also configured with webpack-dev-server, eslint, prettier and babel.
+The application has a React/Next.js frontend and an Express API backed by PostgreSQL. Authentication uses JSON Web Tokens, and patient-related workflows are organized under the dashboard, patient management, and inventory areas.
 
-- [simple-react-full-stack](#simple-react-full-stack)
-  - [Introduction](#introduction)
-    - [Development mode](#development-mode)
-    - [Production mode](#production-mode)
-  - [Quick Start](#quick-start)
-  - [Documentation](#documentation)
-    - [Folder Structure](#folder-structure)
-    - [Babel](#babel)
-    - [ESLint](#eslint)
-    - [Webpack](#webpack)
-    - [Webpack dev server](#webpack-dev-server)
-    - [Nodemon](#nodemon)
-    - [Express](#express)
-    - [Concurrently](#concurrently)
-    - [VSCode + ESLint + Prettier](#vscode--eslint--prettier)
-      - [Installation guide](#installation-guide)
+## Requirements
 
-## Introduction
+- Node.js `24.x` (the project checks this before build and start)
+- npm
+- PostgreSQL `12+` with permission to create the application schema
+- A database created for this application
+- Optional: Google Drive service-account credentials for document-related features
 
-[Create React App](https://github.com/facebook/create-react-app) is a quick way to get started with React development and it requires no build configuration. But it completely hides the build config which makes it difficult to extend. It also requires some additional work to integrate it with an existing Node.js/Express backend application.
-
-This is a simple full stack [React](https://reactjs.org/) application with a [Node.js](https://nodejs.org/en/) and [Express](https://expressjs.com/) backend. Client side code is written in React and the backend API is written using Express. This application is configured with [Airbnb's ESLint rules](https://github.com/airbnb/javascript) and formatted through [prettier](https://prettier.io/).
-
-### Development mode
-
-In the development mode, we will have 2 servers running. The front end code will be served by the [webpack dev server](https://webpack.js.org/configuration/dev-server/) which helps with hot and live reloading. The server side Express code will be served by a node server using [nodemon](https://nodemon.io/) which helps in automatically restarting the server whenever server side code changes.
-
-### Production mode
-
-In the production mode, we will have only 1 server running. All the client side code will be bundled into static files using webpack and it will be served by the Node.js/Express application.
-
-## Quick Start
+Check the installed Node.js version before installing dependencies:
 
 ```bash
-# Clone the repository
-git clone https://github.com/crsandeep/simple-react-full-stack
-
-# Go inside the directory
-cd simple-react-full-stack
-
-# Install dependencies
-yarn (or npm install)
-
-# Start development server
-yarn dev (or npm run dev)
-
-# Build for production
-yarn build (or npm run build)
-
-# Start production server
-yarn start (or npm start)
+node --version
 ```
 
-## Documentation
+It must report version `24.x`.
 
-### Folder Structure
+## Getting Started
 
-All the source code will be inside **src** directory. Inside src, there is client and server directory. All the frontend code (react, css, js and any other assets) will be in client directory. Backend Node.js/Express code will be in the server directory.
+### 1. Install dependencies
 
-### Babel
-
-[Babel](https://babeljs.io/) helps us to write code in the latest version of JavaScript. If an environment does not support certain features natively, Babel will help us to compile those features down to a supported version. It also helps us to convert JSX to Javascript.
-
-[.babelrc file](https://babeljs.io/docs/usage/babelrc/) is used describe the configurations required for Babel. Below is the .babelrc file which I am using.
-
-```javascript
-{
-    "presets": ["env", "react"]
-}
+```bash
+npm install
 ```
 
-Babel requires plugins to do the transformation. Presets are the set of plugins defined by Babel. Preset **env** allows to use babel-preset-es2015, babel-preset-es2016, and babel-preset-es2017 and it will transform them to ES5. Preset **react** allows us to use JSX syntax and it will transform JSX to Javascript.
+### 2. Configure the environment
 
-### ESLint
+Create a `.env` file in the project root. The API reads this file automatically when it starts.
 
-[ESLint](https://eslint.org/) is a pluggable and configurable linter tool for identifying and reporting on patterns in JavaScript.
-
-[.eslintrc.json file](<(https://eslint.org/docs/user-guide/configuring)>) (alternatively configurations can we written in Javascript or YAML as well) is used describe the configurations required for ESLint. Below is the .eslintrc.json file which I am using.
-
-```javascript
-{
-  "extends": ["airbnb"],
-  "env": {
-    "browser": true,
-    "node": true
-  },
-  "rules": {
-    "no-console": "off",
-    "comma-dangle": "off",
-    "react/jsx-filename-extension": "off"
-  }
-}
+```dotenv
+PORT=8080
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=obgyne
+DB_USER=postgres
+DB_PASSWORD=your-database-password
+DB_SSL_REJECT_UNAUTHORIZED=false
 ```
 
-[I am using Airbnb's Javascript Style Guide](https://github.com/airbnb/javascript) which is used by many JavaScript developers worldwide. Since we are going to write both client (browser) and server side (Node.js) code, I am setting the **env** to browser and node. Optionally, we can override the Airbnb's configurations to suit our needs. I have turned off [**no-console**](https://eslint.org/docs/rules/no-console), [**comma-dangle**](https://eslint.org/docs/rules/comma-dangle) and [**react/jsx-filename-extension**](https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-filename-extension.md) rules.
+For Google Drive integration, also provide:
 
-### Webpack
-
-[Webpack](https://webpack.js.org/) is a module bundler. Its main purpose is to bundle JavaScript files for usage in a browser.
-
-[webpack.config.js](https://webpack.js.org/configuration/) file is used to describe the configurations required for webpack. Below is the webpack.config.js file which I am using.
-
-```javascript
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CleanWebpackPlugin = require("clean-webpack-plugin");
-
-const outputDirectory = "dist";
-
-module.exports = {
-  entry: ["babel-polyfill", "./src/client/index.js"],
-  output: {
-    path: path.join(__dirname, outputDirectory),
-    filename: "bundle.js"
-  },
-  module: {
-    rules: [
-      {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader"
-        }
-      },
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"]
-      },
-      {
-        test: /\.(png|woff|woff2|eot|ttf|svg)$/,
-        loader: "url-loader?limit=100000"
-      }
-    ]
-  },
-  devServer: {
-    port: 3000,
-    open: true,
-    proxy: {
-      "/api": "http://localhost:8080"
-    }
-  },
-  plugins: [
-    new CleanWebpackPlugin([outputDirectory]),
-    new HtmlWebpackPlugin({
-      template: "./public/index.html",
-      favicon: "./public/favicon.ico"
-    })
-  ]
-};
+```dotenv
+GOOGLE_DRIVE_CLIENT_EMAIL=your-service-account-email
+GOOGLE_DRIVE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
-1.  **entry:** entry: ./src/client/index.js is where the application starts executing and webpack starts bundling.
-    Note: babel-polyfill is added to support async/await. Read more [here](https://babeljs.io/docs/en/babel-polyfill#usage-in-node-browserify-webpack).
-2.  **output path and filename:** the target directory and the filename for the bundled output
-3.  **module loaders:** Module loaders are transformations that are applied on the source code of a module. We pass all the js file through [babel-loader](https://github.com/babel/babel-loader) to transform JSX to Javascript. CSS files are passed through [css-loaders](https://github.com/webpack-contrib/css-loader) and [style-loaders](https://github.com/webpack-contrib/style-loader) to load and bundle CSS files. Fonts and images are loaded through url-loader.
-4.  **Dev Server:** Configurations for the webpack-dev-server which will be described in coming section.
-5.  **plugins:** [clean-webpack-plugin](https://github.com/johnagan/clean-webpack-plugin) is a webpack plugin to remove the build folder(s) before building. [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) simplifies creation of HTML files to serve your webpack bundles. It loads the template (public/index.html) and injects the output bundle.
+Do not commit `.env` or real credentials. Use a secret manager or deployment environment variables outside local development.
 
-### Webpack dev server
+### 3. Initialize PostgreSQL
 
-[Webpack dev server](https://webpack.js.org/configuration/dev-server/) is used along with webpack. It provides a development server that provides live reloading for the client side code. This should be used for development only.
+Create the database named in `DB_NAME`, then run the schema script:
 
-The devServer section of webpack.config.js contains the configuration required to run webpack-dev-server which is given below.
-
-```javascript
-devServer: {
-    port: 3000,
-    open: true,
-    proxy: {
-        "/api": "http://localhost:8080"
-    }
-}
+```bash
+createdb obgyne
+psql -h localhost -U postgres -d obgyne -f src/server/sql/db_schema.sql
 ```
 
-[**Port**](https://webpack.js.org/configuration/dev-server/#devserver-port) specifies the Webpack dev server to listen on this particular port (3000 in this case). When [**open**](https://webpack.js.org/configuration/dev-server/#devserver-open) is set to true, it will automatically open the home page on startup. [Proxying](https://webpack.js.org/configuration/dev-server/#devserver-proxy) URLs can be useful when we have a separate API backend development server and we want to send API requests on the same domain. In our case, we have a Node.js/Express backend where we want to send the API requests to.
+If your PostgreSQL connection uses different values, update the command and `.env` accordingly.
 
-### Nodemon
+### 4. Start development
 
-Nodemon is a utility that will monitor for any changes in the server source code and it automatically restart the server. This is used in development only.
-
-nodemon.json file is used to describe the configurations for Nodemon. Below is the nodemon.json file which I am using.
-
-```javascript
-{
-  "watch": ["src/server/"]
-}
+```bash
+npm run dev
 ```
 
-Here, we tell nodemon to watch the files in the directory src/server where out server side code resides. Nodemon will restart the node server whenever a file under src/server directory is modified.
+Next.js starts the application in development mode. Open [http://localhost:3000](http://localhost:3000). API requests are available under `/api`; the Express API listens on port `8080` by default.
 
-### Express
+## Production
 
-Express is a web application framework for Node.js. It is used to build our backend API's.
+Build the application and start the production server with:
 
-src/server/index.js is the entry point to the server application. Below is the src/server/index.js file
-
-```javascript
-const express = require("express");
-const os = require("os");
-
-const app = express();
-
-app.use(express.static("dist"));
-app.get("/api/getUsername", (req, res) =>
-  res.send({ username: os.userInfo().username })
-);
-app.listen(8080, () => console.log("Listening on port 8080!"));
+```bash
+npm run build
+npm start
 ```
 
-This starts a server and listens on port 8080 for connections. The app responds with `{username: <username>}` for requests to the URL (/api/getUsername). It is also configured to serve the static files from **dist** directory.
+The production server uses the `PORT` environment variable when provided. Ensure the production environment has the same database variables and a PostgreSQL instance reachable by the application.
 
-### Concurrently
+## Main Features
 
-[Concurrently](https://github.com/kimmobrunfeldt/concurrently) is used to run multiple commands concurrently. I am using it to run the webpack dev server and the backend node server concurrently in the development environment. Below are the npm/yarn script commands used.
+- User login and password management
+- Dashboard for clinic activity and scheduled checkups
+- Patient search, registration, and patient records
+- Diagnoses, medical history, vital signs, delivery history, and patient medicines
+- Medicine inventory and purchase tracking
+- PostgreSQL persistence through the server-side data-access and service layers
 
-```javascript
-"client": "webpack-dev-server --mode development --devtool inline-source-map --hot",
-"server": "nodemon src/server/index.js",
-"dev": "concurrently \"npm run server\" \"npm run client\""
+## Project Structure
+
+```text
+pages/                 Next.js pages and API catch-all entry point
+public/                Public assets
+src/client/            React UI, routes, Redux store, actions, and styles
+src/server/            Express API, routes, services, DAOs, and database access
+src/server/sql/        PostgreSQL schema
+scripts/               Project validation scripts
 ```
 
-### VSCode + ESLint + Prettier
+## Useful Commands
 
-[VSCode](https://code.visualstudio.com/) is a lightweight but powerful source code editor. [ESLint](https://eslint.org/) takes care of the code-quality. [Prettier](https://prettier.io/) takes care of all the formatting.
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Run the development server |
+| `npm run build` | Create a production build |
+| `npm start` | Run the production build |
 
-#### Installation guide
+## API Areas
 
-1.  Install [VSCode](https://code.visualstudio.com/)
-2.  Install [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
-3.  Install [Prettier extension](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-4.  Modify the VSCode user settings to add below configuration
+The Express API is mounted under these route groups:
 
-    ```javascript
-    "eslint.alwaysShowStatus": true,
-    "eslint.autoFixOnSave": true,
-    "editor.formatOnSave": true,
-    "prettier.eslintIntegration": true
-    ```
+- `/api/auth`
+- `/api/admin/user`
+- `/api/admin/patient`
+- `/api/admin/medicine`
+- `/api/admin/patient-diagnosis`
+- `/api/admin/patient-medicine`
+- `/api/admin/patient-delivery`
+- `/api/admin/patient-vitalsigns`
 
-Above, we have modified editor configurations. Alternatively, this can be configured at the project level by following [this article](https://medium.com/@netczuk/your-last-eslint-config-9e35bace2f99).
+See [src/server/api-doc.yaml](src/server/api-doc.yaml) for the API reference.
